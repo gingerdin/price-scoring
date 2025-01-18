@@ -132,8 +132,8 @@ def save_reviews(reviews, app_id, query_summary, filename='data_2.json'):
     
     return True
 
-def save_reviews_csv(reviews, app_id, filename='data_2.csv'):
-    """Save reviews to a CSV file with relevant fields."""
+def save_reviews_csv(reviews, app_id, query_summary, filename='data_2.csv'):
+    """Save reviews to a CSV file with relevant fields and query summary."""
     try:
         # Define the fields we want to save
         fields = [
@@ -162,8 +162,15 @@ def save_reviews_csv(reviews, app_id, filename='data_2.csv'):
         with open(filename, mode, newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             
-            # Write headers if new file
+            # Write headers and query summary if new file
             if not file_exists:
+                # Write query summary as metadata rows
+                writer.writerow(['# Query Summary'])
+                for key, value in query_summary.items():
+                    writer.writerow([f'# {key}', value])
+                writer.writerow([])  # Empty row for separation
+                
+                # Write data headers
                 writer.writerow(['app_id'] + fields)
             
             # Write review data
@@ -206,7 +213,7 @@ if __name__ == "__main__":
             print("Failed to save reviews to JSON")
             
         csv_filename = f"{app_id}_reviews.csv"
-        if save_reviews_csv(all_reviews, app_id, csv_filename):
+        if save_reviews_csv(all_reviews, app_id, query_summary, csv_filename):
             print(f"Successfully saved reviews to {csv_filename}")
         else:
             print("Failed to save reviews to CSV")
