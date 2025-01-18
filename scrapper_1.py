@@ -148,6 +148,7 @@ def save_reviews_csv(reviews, app_id, filename='data_2.csv'):
 
         # Check if file exists to determine if we need to write headers
         file_exists = os.path.exists(filename)
+        print(f"Filename: {filename}")
         
         mode = 'a' if file_exists else 'w'
         with open(filename, mode, newline='', encoding='utf-8') as f:
@@ -182,20 +183,25 @@ app_id = "2951990"
 all_reviews = fetch_reviews(app_id, max_pages=0)
 
 # Save the reviews to both JSON and CSV files
-if all_reviews:
-    print(f"\nTotal reviews fetched: {len(all_reviews)}")
+if __name__ == "__main__":
+    import sys
+    app_id = sys.argv[1] if len(sys.argv) > 1 else "2951990"
+    all_reviews = fetch_reviews(app_id, max_pages=0)
     
-    # Save to JSON
-    if save_reviews(all_reviews, app_id):
-        print("Successfully saved reviews to data_2.json")
-    else:
-        print("Failed to save reviews to JSON")
+    if all_reviews:
+        print(f"\nTotal reviews fetched: {len(all_reviews)}")
         
-    # Save to CSV
-    if save_reviews_csv(all_reviews, app_id):
-        print("Successfully saved reviews to data_2.csv")
-    else:
-        print("Failed to save reviews to CSV")
+        json_filename = f"{app_id}_reviews.json"
+        if save_reviews(all_reviews, app_id, json_filename):
+            print(f"Successfully saved reviews to {json_filename}")
+        else:
+            print("Failed to save reviews to JSON")
+            
+        csv_filename = f"{app_id}_reviews.csv"
+        if save_reviews_csv(all_reviews, app_id, csv_filename):
+            print(f"Successfully saved reviews to {csv_filename}")
+        else:
+            print("Failed to save reviews to CSV")
 
     # Print sample of reviews
     # print("\nSample reviews:")
