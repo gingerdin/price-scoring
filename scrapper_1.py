@@ -18,10 +18,16 @@ def fetch_reviews(app_id, max_pages=5):
     
     reviews = []
     current_page = 0
+    query_summary = None  # Store query summary from first request
     
     try:
         while True:  # Continue until we break due to empty cursor
             data = make_request(url, params)
+            
+            # Store query summary from first request
+            if current_page == 0:
+                query_summary = data.get('query_summary', {})
+                print(f"Query summary: {query_summary}")
             
             if "reviews" in data and len(data["reviews"]) > 0:
                 reviews.extend(data["reviews"])
@@ -52,7 +58,7 @@ def fetch_reviews(app_id, max_pages=5):
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON response: {e}")
     
-    return reviews
+    return reviews, query_summary
 
 def make_request(url, params):
     # Prepare the URL without decoding '=' symbols
@@ -74,13 +80,14 @@ def make_request(url, params):
     return data
 
 
-def save_reviews(reviews, app_id, filename='data_2.json'):
+def save_reviews(reviews, app_id, query_summary, filename='data_2.json'):
     """Save reviews to a JSON file. If file exists, append new reviews."""
     try:
         # Create the data structure
         review_data = {
             'app_id': app_id,
             'total_reviews': len(reviews),
+            'query_summary': query_summary,  # Add query summary to the data
             'reviews': reviews
         }
         
@@ -98,6 +105,7 @@ def save_reviews(reviews, app_id, filename='data_2.json'):
                     
                     existing_data[str(app_id)]['reviews'].extend(new_reviews)
                     existing_data[str(app_id)]['total_reviews'] = len(existing_data[str(app_id)]['reviews'])
+                    existing_data[str(app_id)]['query_summary'] = query_summary  # Update query summary
                     print(f"Added {len(new_reviews)} new reviews to existing data")
                 else:
                     # Add new app_id data
@@ -179,20 +187,20 @@ def save_reviews_csv(reviews, app_id, filename='data_2.csv'):
         return False
 
 # Fetch reviews for Palworld (app ID: 2574900)
-app_id = "2951990"
-all_reviews = fetch_reviews(app_id, max_pages=0)
+app_id = "1670540"
+all_reviews, query_summary = fetch_reviews(app_id, max_pages=0)
 
 # Save the reviews to both JSON and CSV files
 if __name__ == "__main__":
     import sys
-    app_id = sys.argv[1] if len(sys.argv) > 1 else "2951990"
-    all_reviews = fetch_reviews(app_id, max_pages=0)
+    app_id = sys.argv[1] if len(sys.argv) > 1 else "1670540"
+    all_reviews, query_summary = fetch_reviews(app_id, max_pages=0)
     
     if all_reviews:
         print(f"\nTotal reviews fetched: {len(all_reviews)}")
         
         json_filename = f"{app_id}_reviews.json"
-        if save_reviews(all_reviews, app_id, json_filename):
+        if save_reviews(all_reviews, app_id, query_summary, json_filename):
             print(f"Successfully saved reviews to {json_filename}")
         else:
             print("Failed to save reviews to JSON")

@@ -34,8 +34,11 @@ def run_scrappers(app_ids):
 def main():
     # List of app IDs to process
     app_ids = [
-        "2951990",
-          "912833"   # Example app ID
+        "3130750",
+"2574900",
+"3130740",
+"1670540",
+"2325830"   # Example app ID
         # Add more app IDs as needed
     ]
     
